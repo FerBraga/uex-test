@@ -6,7 +6,7 @@
     </x-slot>
 
     @if(session('success'))
-        <div class="alert alert-success" id="successMessage" style="display:none;">
+        <div class="alert alert-success" id="successMessage">
             {{ session('success') }}
         </div>
     @endif
@@ -43,7 +43,7 @@
                                         <small>{{ $contact->street }}</small>
                                     </div>
                                     <div>
-                                        <a href="{{ route('contacts.edit', $contact->id) }}" class="btn btn-secondary btn-sm">Editar</a>
+                                        <a href="{{ route('contacts.edit', $contact->id) }}" method="PUT" class="btn btn-secondary btn-sm">Editar</a>
                                         <form action="{{ route('contacts.destroy', $contact->id) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
@@ -59,3 +59,18 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleciona o elemento da mensagem de sucesso
+        var successMessage = document.getElementById('successMessage');
+
+        // Verifica se o elemento existe
+        if (successMessage) {
+            // Define um temporizador para ocultar a mensagem após 5 segundos (5000 milissegundos)
+            setTimeout(function() {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>

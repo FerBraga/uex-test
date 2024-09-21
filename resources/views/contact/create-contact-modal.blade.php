@@ -8,6 +8,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+            <div class="mb-3">
+                <label for="textSearch" class="form-label">Busque endereço pelo nome</label>
+                <input type="text" id="search-address" class="form-control" placeholder="Digite o nome da rua, cidade ou estado" /></br>
+
+                
+                <label for="cepSearch" class="form-label">Busque endereço pelo CEP</label>
+                <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ old('zipcode') }}" placeholder="Digite um CEP válido" required>
+                @error('zipcode')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div></br>
+
+            <!-- Lista de endereços sugeridos -->
+            <ul id="address-list" class="list-group mt-2"></ul>
+
+                <label for="formheader" class="form-label">Dados do contato:</label>
                 <form id="create-contact-form" method="POST" action="{{ route('contact.store') }}">
                     @csrf
                     <!-- Nome -->
@@ -75,9 +91,9 @@
 
                     <!-- CEP -->
                     <div class="mb-3">
-                        <label for="zipcode" class="form-label">CEP</label>
-                        <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ old('zipcode') }}" required>
-                        @error('zipcode')
+                        <label for="zipcodedata" class="form-label">CEP</label>
+                        <input type="text" class="form-control" id="zipcodedata" name="zipcode" value="{{ old('zipcode') }}" required>
+                        @error('zipcodedata')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
@@ -109,11 +125,12 @@
             fetch(`/get-cep?search=${this.value}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
-                    if (data.success) {
+                    if (data.street || data.city || data.state) {
                         document.getElementById('street').value = data.street;
                         document.getElementById('city').value = data.city;
                         document.getElementById('state').value = data.state;
+                        document.getElementById('zipcode').value = data.zipcode;
+                        
                     } else {
                         alert(data.message); // Exibe mensagem de erro, se necessário
                     }
@@ -126,4 +143,40 @@
             alert('CEP deve ter 8 dígitos.');
         }
     });
+
+    document.getElementById('search-address').addEventListener('blur', function() {
+    var searchTerm = document.getElementById('search-address').value;
+
+    // Aqui faço a requisição com o valor do input
+    fetch(`/get-address?search=${searchTerm}`)
+        .then(response => response.json())
+        .then(data => {
+            let addressList = document.getElementById('address-list');
+            addressList.innerHTML = '';  // Limpa a lista
+            console.log(data);
+            data.forEach(function(address) {
+                let listItem = document.createElement('li');
+                listItem.classList.add('list-group-item');
+                listItem.innerHTML = `
+                    ${address.street}, ${address.city}, ${address.state} - ${address.zipcode}
+                    <button class="btn btn-sm btn-primary select-address" data-address='${JSON.stringify(address)}'>
+                        Selecionar
+                    </button>`;
+                addressList.appendChild(listItem);
+            });
+
+            // Adiciona event listeners nos botões de seleção de endereço
+            document.querySelectorAll('.select-address').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    let address = JSON.parse(this.getAttribute('data-address'));
+                    document.getElementById('street').value = address.street;
+                    document.getElementById('city').value = address.city;
+                    document.getElementById('state').value = address.state;
+                    document.getElementById('zipcodedata').value = address.zipcode;
+                });
+            });
+
+        })
+        .catch(error => console.error('Erro:', error));
+});
 </script>

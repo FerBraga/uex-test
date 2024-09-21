@@ -6,10 +6,13 @@ use App\Helpers\CpfValidator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contact\CreateContactRequest;
 use App\Http\Requests\Contact\UpdateContactRequest;
+use App\Models\UserContact;
 use App\Repositories\Contact\ContactRepository;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class ContactController extends Controller
@@ -24,11 +27,8 @@ class ContactController extends Controller
 
     public function store(CreateContactRequest $request)
     {
-
-
         $request->validated();
 
-   
         $data = $request->all();
 
          // Valida o CPF
@@ -37,14 +37,33 @@ class ContactController extends Controller
             return redirect()->back()->withErrors(['cpf' => $cpfValidationResult])->withInput();
         }
 
-        // $search = urlencode("$rua, $cidade, $estado, $pais");
+        $userId = Auth::id();
 
-        // $response = Http::get(env('API_GOOGLE_MAPS_BASE_URL') . '/json', [
-        //     'address' => $search,
-        //     'key' => env('API_GOOGLE_MAPS_KEY'),
-        // ]);
+        $userAlreadyHasThisContact = $this->contactRepository->findByCpf($data['cpf'], $userId);
 
-    
+        if (is_string($userAlreadyHasThisContact)) {
+            return redirect()->back()->withErrors(['cpf' => $userAlreadyHasThisContact])->withInput();
+        }
+
+        $search = urlencode("{$data['city']}, {$data['state']}, {$data['street']}");
+
+        try {
+        
+            $response = Http::withHeaders([
+                'User-Agent' => 'MinhaAplicacao/1.0 (contato@minhaempresa.com)', 
+                'Referer' => 'https://minhaempresa.com',
+            ])->get(env('API_GEO_MAP_URL') . $search);
+ 
+        } catch (RequestException $e) {
+            // Captura erros de requisição (como problemas de conexão)
+            Log::info('Erro: ' .$e->getMessage());
+
+        } catch (\Exception $e) {
+            // Captura outros tipos de erros
+            Log::info('Erro: ' .$e->getMessage());
+
+        }
+
         $data = [
             'city' => $data['city'],
             'state' => $data['state'],
@@ -54,8 +73,8 @@ class ContactController extends Controller
             'phone' => $data['phone'],
             'street' => $data['street'],
             'zipcode' => $data['zipcode'],
-            'longitude' => '-23.5505', 
-            'latitude' => '-46.6333', 
+            'longitude' => $response[0]['lon'],
+            'latitude' => $response[0]['lat'], 
             'complementation' => $data['complementation'] ? $data['complementation'] : null,
         ];
 
@@ -112,10 +131,21 @@ class ContactController extends Controller
     public function getCep(Request $request)
 
     {  
-
         $search = $request->input('search');
 
-        $result = Http::get(env('API_CEP_BASE_URL'). $search .'/json')->json();
+
+        try {
+            $result = Http::get(env('API_CEP_BASE_URL'). $search .'/json')->json();
+
+        } catch (RequestException $e) {
+            // Captura erros de requisição (como problemas de conexão)
+            Log::info('Erro: ' .$e->getMessage());
+
+        } catch (\Exception $e) {
+            // Captura outros tipos de erros
+            Log::info('Erro: ' .$e->getMessage());
+
+        }
 
         $dataFormatted = [
             "zipcode" => $result['cep'],
@@ -132,36 +162,41 @@ class ContactController extends Controller
     public function getAddress(Request $request)
 
     {   
-        $rua = $request->input('rua');
-        $cidade = $request->input('cidade');
-        $estado = $request->input('estado');
-        $pais = $request->input('pais');
+   
+        $search = urlencode($request->input('search'));
 
-         // Monta a string de busca
-        $search = urlencode("$rua, $cidade, $estado, $pais");
-        // Faz a requisição usando a facade Http
-        // $response = Http::get(env('API_GOOGLE_MAPS_BASE_URL') . '/json', [
-        //     'address' => $search,
-        //     'key' => env('API_GOOGLE_MAPS_KEY'),
-        // ]);
-
-        $response= ['rua'=> 'Rua da lua', 'cidade'=> 'Curitiba', 'estado'=>'Paraná', 'país'=> 'Brasil'];
-
-        return json_encode($response);
-    
-        // Verifica se a resposta foi bem-sucedida
-        // if ($response->successful()) {
-        //     $data = $response->json();
-            
-        //     // Verifica se há resultados
-        //     if (!empty($data['results'])) {
-        //         return $data['results'];
-        //     } else {
-        //         return "Endereço não encontrado!";
-        //     }
-        // } else {
-        //     return "Erro ao acessar o serviço de busca de endereço";
-        // }
-    }
+        try {
         
+            $response = Http::withHeaders([
+                'User-Agent' => 'MinhaAplicacao/1.0 (contato@minhaempresa.com)', 
+                'Referer' => 'https://minhaempresa.com',
+            ])->get(env('API_GEO_MAP_URL') . $search);
+
+        } catch (RequestException $e) {
+            // Captura erros de requisição (como problemas de conexão)
+            Log::info('Erro: ' .$e->getMessage());
+
+        } catch (\Exception $e) {
+            // Captura outros tipos de erros
+            Log::info('Erro: ' .$e->getMessage());
+
+        }
+
+        $dataFormatted = [];
+
+        foreach(array_slice($response->json(), 0, 3)  as $address) {
+            $data = [
+               'street' => $address['address']['road'] ?? '',
+                'city' => $address['address']['city'] ?? '',
+                'state' => $address['address']['state'] ?? '',
+                'zipcode' => $address['address']['postcode'] ?? '',
+                'longitude' => $address['lon'] ?? '',
+                'latitude' => $address['lat'] ?? '',
+            ];
+
+            array_push($dataFormatted, $data);        
+        }
+
+       return response()->json($dataFormatted);
+    }
 }

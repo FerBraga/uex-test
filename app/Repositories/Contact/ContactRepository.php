@@ -33,6 +33,21 @@ class ContactRepository
         return Contact::findOrFail($id);
     }
 
+    public function findByCpf(string $cpf, string $userId)
+    {
+        $contact = Contact::where('cpf', $cpf)->first();
+
+        if($contact != null) {
+            $userIsOwner = UserContact::find([$cpf, $userId]);
+
+            if ($userIsOwner !== null) {
+                return 'Você já tem um contato com esse CPF.';
+            };
+        };
+
+        return $contact;
+    }
+
     public function create(array $data)
     {
         $address = [
@@ -41,8 +56,8 @@ class ContactRepository
             'street' => $data['street'],
             'number' => $data['number'],
             'zipcode' => $data['zipcode'],
-            'longitude' => '-23.5505', 
-            'latitude' => '-46.6333', 
+            'longitude' => $data['longitude'], 
+            'latitude' => $data['latitude'], 
             'complementation' => $data['complementation'] ? $data['complementation'] : null,
         ];
 
