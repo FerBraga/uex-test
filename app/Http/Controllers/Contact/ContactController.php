@@ -90,9 +90,9 @@ class ContactController extends Controller
 
         $search = $request->input('search');
         $sort = $request->input('sort', 'asc');
-        $page = $request->input('page');
 
-        $contactsList = $this->contactRepository->list($search, $sort, $page);
+        $contactsList = $this->contactRepository->list($sort, $search);
+
 
         return view('home', [
             'contacts' => $contactsList,

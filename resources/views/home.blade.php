@@ -55,9 +55,10 @@
                                     <div>
                                         <strong>{{ $contact->name }}</strong><br>
                                         <small>{{ $contact->phone }}</small><br>
-                                        <small>{{ $contact->city }}</small><br>
-                                        <small>{{ $contact->state }}</small><br>
-                                        <small>{{ $contact->street }}</small>
+                                        <small>{{ $contact->address->street }}</small><br>
+                                        <small>{{ $contact->address->number }}</small><br>
+                                        <small>{{ $contact->address->city }}</small><br>
+                                        <small>{{ $contact->address->state }}</small><br>
                                     </div>
                                     <div>
                                         <a href="{{ route('contacts.edit', $contact->id) }}" method="PUT" class="btn btn-secondary btn-sm">Editar</a>
@@ -70,11 +71,11 @@
                                 </li>
                             @endforeach
                         </ul>
-
-                        <!-- Paginação -->
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $contacts->appends(request()->query())->links() }}
-                        </div>
+                    <!-- Paginação -->
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $contacts->appends(request()->query())->links() }}
+                    </div>
+                    
                     @endif
                 </div>
             </div>
