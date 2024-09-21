@@ -11,14 +11,20 @@ use Illuminate\Support\Facades\Auth;
 class ContactRepository
 {
 
-    public function list(string $userId)
+    public function list($search = '', string $sort, $page = 1)
     {
 
-        $contacts = Contact::whereHas('users', function ($query) use ($userId) {
-            $query->where('users.id', $userId);
-        })->with(['address' => function ($query) {
-            $query->select('id', 'city', 'state', 'street', 'number');
-        }])->get();
+        $contacts = Contact::whereHas('users', function ($query) {
+            $query->where('users.id', auth()->id()); // filtra contatos pelo ID do usuário logado
+        })
+        ->when($search, function ($query) use ($search) {
+            return $query->where('name', 'like', "%{$search}%")
+                         ->orWhere('cpf', 'like', "%{$search}%");
+        })
+        ->with(['address' => function ($query) {
+            $query->select('id', 'city', 'state', 'street', 'number');}])
+        ->orderBy('name', $sort) // ou pelo valor de $sort se estiver definido
+        ->paginate(5, ['*'], 'page', $page); // Define o perPage e a página atual
 
         return $contacts;
     }

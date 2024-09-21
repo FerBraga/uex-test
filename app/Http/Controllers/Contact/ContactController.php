@@ -6,6 +6,7 @@ use App\Helpers\CpfValidator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contact\CreateContactRequest;
 use App\Http\Requests\Contact\UpdateContactRequest;
+use App\Models\Contact;
 use App\Models\UserContact;
 use App\Repositories\Contact\ContactRepository;
 use GuzzleHttp\Exception\RequestException;
@@ -84,11 +85,14 @@ class ContactController extends Controller
         return redirect()->route('home')->with('success', 'Contato salvo com sucesso!');
     }
 
-    public function list(): View
+    public function list(Request $request): View
     {
-        $userId = Auth::id();
 
-        $contactsList = $this->contactRepository->list($userId);
+        $search = $request->input('search');
+        $sort = $request->input('sort', 'asc');
+        $page = $request->input('page');
+
+        $contactsList = $this->contactRepository->list($search, $sort, $page);
 
         return view('home', [
             'contacts' => $contactsList,

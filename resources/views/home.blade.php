@@ -11,7 +11,6 @@
         </div>
     @endif
 
-
     <!-- Include do modal -->
     @include('contact.create-contact-modal')
 
@@ -20,11 +19,29 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <!-- Botão para adicionar um contato -->
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createContactModal">
-                        Adicionar Novo Contato
-                    </button>
-                    <form method="POST" action="{{ route('contact.store') }}">
+                 
+
+                    <!-- Campo de busca (com tamanho mais controlado) -->
+                    <form action="{{ route('home') }}" method="GET" class="mb-4">
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="text" name="search" class="form-control" placeholder="Digite o nome ou CPF do contato" value="{{ request('search') }}">
+                            <button class="btn btn-primary" type="submit">Buscar</button>
+                        </div>
+                    </form>
+
+
+                    <!-- Botão para adicionar um contato com espaçamento -->
+                    <div class="mb-4 text-right">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createContactModal">
+                            Adicionar novo contato
+                        </button>
+                    </div>
+
+                    <!-- Botões de ordenação -->
+                    <div class="mb-3">
+                        <a href="{{ route('home', ['sort' => 'asc', 'search' => request('search')]) }}" class="btn btn-sm btn-outline-secondary">Ordenar A-Z</a>
+                        <a href="{{ route('home', ['sort' => 'desc', 'search' => request('search')]) }}" class="btn btn-sm btn-outline-secondary">Ordenar Z-A</a>
+                    </div>
 
                     <!-- Lista de contatos -->
                     @if ($contacts->isEmpty())
@@ -53,6 +70,11 @@
                                 </li>
                             @endforeach
                         </ul>
+
+                        <!-- Paginação -->
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $contacts->appends(request()->query())->links() }}
+                        </div>
                     @endif
                 </div>
             </div>
