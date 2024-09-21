@@ -28,6 +28,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::delete('/contact/delete',[ContactController::class, 'destroy'])->name('contacts.destroy');
     Route::get('/get-address', [ContactController::class, 'getAddress'])->name('get.address');
     Route::get('/get-cep', [ContactController::class, 'getCep'])->name('get.cep');
+    Route::get('/get-map', [ContactController::class, 'getMap'])->name('get.map');
 });
 
 Route::middleware('auth')->group(function () {

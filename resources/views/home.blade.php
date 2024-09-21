@@ -49,28 +49,33 @@
                             Nenhum contato encontrado.
                         </div>
                     @else
-                        <ul class="list-group">
-                            @foreach ($contacts as $contact)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ $contact->name }}</strong><br>
-                                        <small>{{ $contact->phone }}</small><br>
-                                        <small>{{ $contact->address->street }}</small><br>
-                                        <small>{{ $contact->address->number }}</small><br>
-                                        <small>{{ $contact->address->city }}</small><br>
-                                        <small>{{ $contact->address->state }}</small><br>
-                                    </div>
-                                    <div>
-                                        <a href="{{ route('contacts.edit', $contact->id) }}" method="PUT" class="btn btn-secondary btn-sm">Editar</a>
-                                        <form action="{{ route('contacts.destroy', $contact->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
-                                        </form>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
+                    <div id="container" class="container">
+                        <div class="col-md-6">
+                            <ul class="list-group" >
+                                @foreach ($contacts as $contact)
+                                <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showMap('{{ $contact->address->street }}, {{ $contact->address->number }}, {{ $contact->address->city }}, {{ $contact->address->state }}')">
+                                        <div>
+                                            <strong>{{ $contact->name }}</strong><br>
+                                            <small>{{ $contact->phone }}</small><br>
+                                            <small>{{ $contact->address->street }}</small><br>
+                                            <small>{{ $contact->address->number }}</small><br>
+                                            <small>{{ $contact->address->city }}</small><br>
+                                            <small>{{ $contact->address->state }}</small><br>
+                                        </div>
+                                        <div>
+                                            <a href="{{ route('contacts.edit', $contact->id) }}" method="PUT" class="btn btn-secondary btn-sm">Editar</a>
+                                            <form action="{{ route('contacts.destroy', $contact->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                        
                     <!-- Paginação -->
                     <div class="d-flex justify-content-center mt-4">
                         {{ $contacts->appends(request()->query())->links() }}
@@ -96,4 +101,41 @@
             }, 5000);
         }
     });
+
+
+    function showMap(address) {
+        const encodedAddress = encodeURIComponent(address);
+        fetch(`/get-map?search=${encodedAddress}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.features.length > 0) {
+                    const { center } = data.features[0];
+                    const [lon, lat] = center;
+
+                    // Crie o modal do mapa
+                    const mapModal = document.createElement('div');
+                    mapModal.innerHTML = ` <div class="col-md-6"> <div id="map" style="width: 100%; height: 400px;"></div></div>`;
+                    const container = document.getElementById('container');
+                    container.appendChild(mapModal);
+
+                    // Inicialize o mapa
+                    mapboxgl.accessToken = data.access_token;
+                    const map = new mapboxgl.Map({
+                        container: 'map',
+                        style: 'mapbox://styles/mapbox/streets-v11',
+                        center: [lon, lat],
+                        zoom: 15
+                    });
+
+                    // Adicione o pin
+                    new mapboxgl.Marker()
+                        .setLngLat([lon, lat])
+                        .addTo(map);
+
+                        $('#mapModal').modal('show');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+}
+
 </script>

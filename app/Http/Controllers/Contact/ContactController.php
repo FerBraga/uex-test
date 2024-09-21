@@ -203,4 +203,55 @@ class ContactController extends Controller
 
        return response()->json($dataFormatted);
     }
+
+    public function getMap(Request $request)
+
+    {   
+   
+        $search = urlencode($request->input('search'));
+
+        try {
+        
+            $response = Http::withHeaders([
+                'User-Agent' => 'MinhaAplicacao/1.0 (contato@minhaempresa.com)', 
+                'Referer' => 'https://minhaempresa.com',
+            ])->get(env('API_MAP_BOX_URL') . $search . '.json?access_token='. env('API_MAP_BOX_PUBLIC_ACCESS_TOKEN'));
+
+            if ($response->successful()) {
+                // Decodifique a resposta JSON
+                $data = $response->json();
+
+                $data['access_token'] = env('API_MAP_BOX_PUBLIC_ACCESS_TOKEN');
+                // Retorne os dados desejados (por exemplo, coordenadas)
+                if (isset($data['features']) && count($data['features']) > 0) {
+                    return response()->json($data); // Retorne a resposta completa ou apenas o que precisar
+                }
+            };
+        } catch (RequestException $e) {
+            // Captura erros de requisição (como problemas de conexão)
+            Log::info('Erro: ' .$e->getMessage());
+
+        } catch (\Exception $e) {
+            // Captura outros tipos de erros
+            Log::info('Erro: ' .$e->getMessage());
+
+        }
+
+        $dataFormatted = [];
+
+        foreach(array_slice($response->json(), 0, 3)  as $address) {
+            $data = [
+               'street' => $address['address']['road'] ?? '',
+                'city' => $address['address']['city'] ?? '',
+                'state' => $address['address']['state'] ?? '',
+                'zipcode' => $address['address']['postcode'] ?? '',
+                'longitude' => $address['lon'] ?? '',
+                'latitude' => $address['lat'] ?? '',
+            ];
+
+            array_push($dataFormatted, $data);        
+        }
+
+       return response()->json($dataFormatted);
+    }
 }
