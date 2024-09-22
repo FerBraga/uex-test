@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  # Outros serviços como app, db, etc.
+  
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - 8025:8025  # Porta para acessar a interface web do Mailpit
+      - 1025:1025  # Porta SMTP para enviar emails
+    restart: unless-stopped

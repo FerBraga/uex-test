@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Contact\ContactController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,10 +17,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/home', function () {
-    return view('home');
-})->middleware(['auth', 'verified'])->name('home');
 
+    Route::get('/', function () {
+        // Verifica se o usuário está autenticado
+        if (Auth::check()) {
+            // Se autenticado, redireciona para a home (ou onde você quiser)
+            return redirect()->route('home');
+        } else {
+            // Se não estiver autenticado, redireciona para o signup
+            return redirect()->route('register');
+        }
+    })->name('home');
+    
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
 
 
 Route::middleware('auth', 'verified')->group(function () {
