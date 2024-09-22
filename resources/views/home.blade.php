@@ -11,7 +11,7 @@
         </div>
 
     @elseif(session('fail'))
-        <div class="alert alert-fail" id="failMessage">
+        <div class="alert alert-danger" id="failMessage">
             {{ session('fail') }}
         </div>
     @endif
@@ -24,7 +24,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div id='newcontainer' class="p-6 text-gray-900">
 
                  
 
@@ -56,7 +56,7 @@
                             Nenhum contato encontrado.
                         </div>
                     @else
-                    <div id="container" class="container">
+                    <div id="container" class="container" style="display:inline;">
                         <div class="col-md-6">
                             <ul class="list-group" >
                                 @foreach ($contacts as $contact)
@@ -74,7 +74,7 @@
                                         <div>
                                             <a href="#" data-all="{{ $contact }}" data-bs-toggle="modal" data-bs-target="#updateContactModal" class="btn btn-secondary btn-sm">Editar</a>
 
-                                            <form action="{{ route('contact.destroy', $contact->id) }}" method="POST" style="display:inline;">
+                                            <form action="{{ route('contact.destroy', 5) }}" method="POST" style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
@@ -97,6 +97,22 @@
         </div>
     </div>
 </x-app-layout>
+
+@if (session('modal') === 'create')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $('#createContactModal').modal('show');
+        });
+    </script>
+@endif
+
+@if (session('modal') === 'update')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $('#updateContactModal').modal('show');
+        });
+    </script>
+@endif
 
 @section('scripts')
     @vite(['resources/js/custom/customHome.js'])

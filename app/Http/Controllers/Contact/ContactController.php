@@ -34,7 +34,8 @@ class ContactController extends Controller
          // Valida o CPF
         $cpfValidationResult = CpfValidator::validate($data['cpf']);
         if ($cpfValidationResult !== true) {
-            return redirect()->back()->withErrors(['cpf' => $cpfValidationResult])->withInput();
+            return redirect()->back()->withErrors(['cpf' => $cpfValidationResult])->withInput()->with('modal', 'create');
+
         }
 
         $userId = Auth::id();
@@ -42,7 +43,7 @@ class ContactController extends Controller
         $userAlreadyHasThisContact = $this->contactRepository->findByCpf($data['cpf'], $userId);
 
         if (is_string($userAlreadyHasThisContact)) {
-            return redirect()->back()->withErrors(['cpf' => $userAlreadyHasThisContact])->withInput();
+            return redirect()->back()->withErrors(['cpf' => $userAlreadyHasThisContact])->withInput()->with('modal', 'create');
         }
 
         $search = urlencode("{$data['city']}, {$data['state']}, {$data['street']}");
@@ -69,7 +70,7 @@ class ContactController extends Controller
         return redirect()->route('home')->with('success', 'Contato salvo com sucesso!');
     }
 
-    public function list(Request $request): View
+    public function index(Request $request): View
     {
 
         $search = $request->input('search');
@@ -77,16 +78,6 @@ class ContactController extends Controller
 
         $contactsList = $this->contactRepository->list($sort, $search);
 
-
-        return view('home', [
-            'contacts' => $contactsList,
-        ]);
-    }
-
-    public function paginate(string $page, string $order)
-    {
-    
-        $contactsList = $this->contactRepository->paginate($page, $order);
 
         return view('home', [
             'contacts' => $contactsList,

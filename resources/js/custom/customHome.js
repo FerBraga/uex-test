@@ -51,8 +51,8 @@ function showMap(address) {
 
                 // Crie o modal do mapa
                 const mapModal = document.createElement('div');
-                mapModal.innerHTML = ` <div class="col-md-6"> <div id="map" style="width: 100%; height: 400px;"></div></div>`;
-                const container = document.getElementById('container');
+                mapModal.innerHTML = ` <div"> <div id="map" style="width: 100%; height: 400px;"></div></div>`;
+                const container = document.getElementById('newcontainer');
                 container.appendChild(mapModal);
 
                 // Inicialize o mapa

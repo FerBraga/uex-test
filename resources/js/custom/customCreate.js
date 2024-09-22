@@ -1,3 +1,7 @@
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
 document.getElementById('zipcode').addEventListener('blur', function() {
     var zipcode = this.value.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
     if (zipcode.length === 8) { // Verifica se o CEP tem 8 dígitos
@@ -22,7 +26,7 @@ document.getElementById('zipcode').addEventListener('blur', function() {
         alert('CEP deve ter 8 dígitos.');
     }
 });
-
+});
 let typingTimer;                
 let doneTypingInterval = 1000;  
 let searchInput = document.getElementById('search-address');
@@ -66,14 +70,12 @@ function doneTyping() {
 
                 document.querySelectorAll('.select-address').forEach(function (button) {
                     button.addEventListener('click', function () {
-                        console.log('click')
-                        console.log(data);
                         let address = JSON.parse(this.getAttribute('data-address'));
                         document.getElementById('street').value = address.street;
                         document.getElementById('city').value = address.city;
                         document.getElementById('state').value = address.state;
                         document.getElementById('zipcodedata').value = address.zipcode;
-                        listItem.innerHTML = '';  
+                        addressList.innerHTML = '';  
                     });
                 });
 

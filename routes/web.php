@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware('auth', 'verified')->group(function () {
-    Route::get('/home', [ContactController::class, 'list'])->name('home');
+    Route::get('/home', [ContactController::class, 'index'])->name('home');
     Route::post('/contact',[ContactController::class, 'store'])->name('contact.store');
     Route::put('/contact/{id}',[ContactController::class, 'update'])->name('contact.update');
     Route::delete('/contact/{id}',[ContactController::class, 'destroy'])->name('contact.destroy');
