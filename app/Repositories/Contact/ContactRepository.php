@@ -18,7 +18,7 @@ class ContactRepository
             $query->where('users.id', auth()->id()); // filtra contatos pelo ID do usuário logado
         })
         ->with(['address' => function ($query) {
-            $query->select('id', 'city', 'state', 'street', 'number'); // seleciona os campos do endereço
+            $query->select('id', 'city', 'state', 'street', 'number', 'zipcode'); // seleciona os campos do endereço
         }])
         ->when($search, function ($query) use ($search) {
             $query->where(function ($query) use ($search) {
@@ -86,16 +86,60 @@ class ContactRepository
         return UserContact::create(['user_id'=>  $userId, 'contact_id' => $contactId->id]);
     }
 
-    public function update(UpdateContactRequest $data, int $id)
+    public function update(array $data, int $id)
     {
-        $contact = Contact::findOrFail($id);
-        $contact->update($data);
-        return $contact;
+
+        $userId = Auth::id();
+
+        $userIsOwner = UserContact::where('user_id', $userId)
+        ->where('contact_id', $id)
+        ->exists();
+
+        if ($userIsOwner) {
+    
+            $contact = Contact::findOrFail($id);
+
+            $contact->address->update([
+                'city' => $data['city-edit'],
+                'state' => $data['state-edit'],
+                'street' => $data['street-edit'],
+                'number' => $data['number-edit'],
+                'zipcode' => $data['zipcodedata-edit'],
+                'complementation' => $data['complementation-edit'] ?? null
+            ]);
+
+            $contact->update([
+                'name' => $data['name'],
+                'cpf' => $data['cpf'],
+                'phone' => $data['phone'],
+            ]);
+
+            return 'Contact updated';
+        }
+
+        return 'You cant update this contact';
+
     }
 
-    public function delete(int $id)
-    {
-        $contact = Contact::findOrFail($id);
-        $contact->delete();
+    public function delete(int $id) {
+
+    
+        $userId = Auth::id();
+
+        $userIsOwner = UserContact::where('user_id', $userId)
+        ->where('contact_id', $id)
+        ->exists();
+
+        if ($userIsOwner) {
+            $contact = Contact::findOrFail($id);
+            $contact->address->delete();
+            $contact->delete();
+
+            return 'Contact deleted';
+
+        }
+
+        return 'You cant delete this contact';
+
     }
 }

@@ -6,8 +6,6 @@ use App\Helpers\CpfValidator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contact\CreateContactRequest;
 use App\Http\Requests\Contact\UpdateContactRequest;
-use App\Models\Contact;
-use App\Models\UserContact;
 use App\Repositories\Contact\ContactRepository;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
@@ -116,20 +114,31 @@ class ContactController extends Controller
         return response()->json($contact, 201);
     }
 
-    public function update(UpdateContactRequest $update, string $contactId, )
+    public function update(UpdateContactRequest $update, string $id )
     {
 
-        $this->contactRepository->update($update, $contactId);
+        $data = $update->validated();
+  
+        $result = $this->contactRepository->update($data, $id);
 
-        return response()->json('contact updated', 201);
+        if ($result === 'Contact updated') {
+            return redirect()->route('home')->with('success', 'Contato atualizado com sucesso!');
+        }
+
+        return redirect()->route('home')->with('fail', 'Você não pode atualizar este contato!');
     }
 
-    public function delete(string $contactId )
+    public function destroy(string $contactId )
     {
+        
+        $result = $this->contactRepository->delete($contactId);
+        
+        if ($result === 'Contact deleted') {
+            return redirect()->route('home')->with('success', 'Contato deletado com sucesso!');
+        }
 
-        $this->contactRepository->delete($contactId);
+        return redirect()->route('home')->with('fail', 'Você não pode deletar este contato!');
 
-        return response()->json('contact deleted', 201);
     }
 
     public function getCep(Request $request)

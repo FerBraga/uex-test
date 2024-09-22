@@ -9,10 +9,17 @@
         <div class="alert alert-success" id="successMessage">
             {{ session('success') }}
         </div>
+
+    @elseif(session('fail'))
+        <div class="alert alert-fail" id="failMassage">
+            {{ session('fail') }}
+        </div>
     @endif
 
     <!-- Include do modal -->
     @include('contact.create-contact-modal')
+    @include('contact.update-contact-modal')
+    
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -55,16 +62,19 @@
                                 @foreach ($contacts as $contact)
                                 <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showMap('{{ $contact->address->street }}, {{ $contact->address->number }}, {{ $contact->address->city }}, {{ $contact->address->state }}')">
                                         <div>
+                                            <strong hidden>{{ $contact->id }}</strong><br>
                                             <strong>{{ $contact->name }}</strong><br>
                                             <small>{{ $contact->phone }}</small><br>
                                             <small>{{ $contact->address->street }}</small><br>
                                             <small>{{ $contact->address->number }}</small><br>
                                             <small>{{ $contact->address->city }}</small><br>
                                             <small>{{ $contact->address->state }}</small><br>
+                                            <small>{{ $contact->address->zipcode }}</small><br>
                                         </div>
                                         <div>
-                                            <a href="{{ route('contacts.edit', $contact->id) }}" method="PUT" class="btn btn-secondary btn-sm">Editar</a>
-                                            <form action="{{ route('contacts.destroy', $contact->id) }}" method="POST" style="display:inline;">
+                                            <a href="#" data-all="{{ $contact }}" data-bs-toggle="modal" data-bs-target="#updateContactModal" class="btn btn-secondary btn-sm">Editar</a>
+
+                                            <form action="{{ route('contact.destroy', $contact->id) }}" method="POST" style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">Deletar</button>
@@ -102,6 +112,30 @@
         }
     });
 
+    document.getElementById('updateContactModal').addEventListener('show.bs.modal', function (event) {
+        // O botão que acionou o modal
+        var button = event.relatedTarget;
+        
+        // Obtém os dados do contato a partir do atributo data-all
+        var contact = JSON.parse(button.getAttribute('data-all'));
+
+        // Preenche os campos do modal com os dados do contato
+        var modal = this;
+        // modal.querySelector('#id').value = contact.id;
+        modal.querySelector('#name').value = contact.name;
+        modal.querySelector('#cpf').value = contact.cpf;
+        modal.querySelector('#phone').value = contact.phone;
+        modal.querySelector('#city-edit').value = contact.address.city;
+        modal.querySelector('#street-edit').value = contact.address.street;
+        modal.querySelector('#number-edit').value = contact.address.number;
+        modal.querySelector('#state-edit').value = contact.address.state;
+        modal.querySelector('#zipcodedata-edit').value = contact.address.zipcode;
+        modal.querySelector('#complementation-edit').value = contact.address.complementation ?? '';
+        var form = document.getElementById('update-contact-form');
+        form.action = `/contact/${contact.id}/edit`;
+
+    });
+
 
     function showMap(address) {
         const encodedAddress = encodeURIComponent(address);
@@ -136,6 +170,6 @@
                 }
             })
             .catch(error => console.error('Error:', error));
-}
+    }
 
 </script>
