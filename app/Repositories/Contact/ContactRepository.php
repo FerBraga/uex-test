@@ -6,6 +6,7 @@ use App\Http\Requests\Contact\UpdateContactRequest;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Models\UserContact;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class ContactRepository
@@ -91,34 +92,35 @@ class ContactRepository
 
         $userId = Auth::id();
 
-        $userIsOwner = UserContact::where('user_id', $userId)
-        ->where('contact_id', $id)
-        ->exists();
-
-        if ($userIsOwner) {
+        try {
+            $userIsOwner = UserContact::where('user_id', $userId)
+            ->where('contact_id', $id)
+            ->exists();
     
-            $contact = Contact::findOrFail($id);
-
-            $contact->address->update([
-                'city' => $data['city-edit'],
-                'state' => $data['state-edit'],
-                'street' => $data['street-edit'],
-                'number' => $data['number-edit'],
-                'zipcode' => $data['zipcodedata-edit'],
-                'complementation' => $data['complementation-edit'] ?? null
-            ]);
-
-            $contact->update([
-                'name' => $data['name'],
-                'cpf' => $data['cpf'],
-                'phone' => $data['phone'],
-            ]);
-
-            return 'Contact updated';
+            if ($userIsOwner) {
+        
+                $contact = Contact::findOrFail($id);
+    
+                $contact->address->update([
+                    'city' => $data['city-edit'],
+                    'state' => $data['state-edit'],
+                    'street' => $data['street-edit'],
+                    'number' => $data['number-edit'],
+                    'zipcode' => $data['zipcodedata-edit'],
+                    'complementation' => $data['complementation-edit'] ?? null
+                ]);
+    
+                $contact->update([
+                    'name' => $data['name'],
+                    'cpf' => $data['cpf'],
+                    'phone' => $data['phone'],
+                ]);
+    
+                return 'Contact updated';
+            }
+        }catch (Exception $e) {
+            return 'You cant update this contact';
         }
-
-        return 'You cant update this contact';
-
     }
 
     public function delete(int $id) {

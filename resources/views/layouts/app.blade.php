@@ -15,7 +15,7 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/custom/customCreate.js', 'resources/js/custom/customUpdate.js', 'resources/js/custom/customHome.js'])
 
     <!-- Mapbox JS -->
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
@@ -38,5 +38,6 @@
             {{ $slot }}
         </main>
     </div>
+    @yield('scripts')
 </body>
 </html>

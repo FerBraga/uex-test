@@ -1,5 +1,4 @@
 <!-- Modal -->
-
 <div class="modal fade @if($errors->any()) show @endif" id="createContactModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" @if($errors->any()) style="display:block;" @endif>
     <div class="modal-dialog">
         <div class="modal-content">
@@ -117,68 +116,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.getElementById('zipcode').addEventListener('blur', function() {
-        var zipcode = this.value.replace(/[^0-9]/g, ''); // Remove caracteres não numéricos
-        if (zipcode.length === 8) { // Verifica se o CEP tem 8 dígitos
-            fetch(`/get-cep?search=${this.value}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.street || data.city || data.state) {
-                        document.getElementById('street').value = data.street;
-                        document.getElementById('city').value = data.city;
-                        document.getElementById('state').value = data.state;
-                        document.getElementById('zipcode').value = data.zipcode;
-                        
-                    } else {
-                        alert(data.message); // Exibe mensagem de erro, se necessário
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao buscar o endereço. Tente novamente.');
-                });
-        } else {
-            alert('CEP deve ter 8 dígitos.');
-        }
-    });
-
-    document.getElementById('search-address').addEventListener('blur', function() {
-        var searchTerm = document.getElementById('search-address').value;
-
-        // Aqui faço a requisição com o valor do input
-        fetch(`/get-address?search=${searchTerm}`)
-            .then(response => response.json())
-            .then(data => {
-                let addressList = document.getElementById('address-list');
-
-                addressList.innerHTML = '';  // Limpa a lista
-
-                data.forEach(function(address) {
-                    let listItem = document.createElement('li');
-                    listItem.classList.add('list-group-item');
-                    listItem.innerHTML = `
-                        ${address.street}, ${address.city}, ${address.state} - ${address.zipcode}
-                        <button class="btn btn-sm btn-primary select-address" data-address='${JSON.stringify(address)}'>
-                            Selecionar
-                        </button>`;
-                    addressList.appendChild(listItem);
-                });
-
-                // Adiciona event listeners nos botões de seleção de endereço
-                document.querySelectorAll('.select-address').forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        let address = JSON.parse(this.getAttribute('data-address'));
-                        document.getElementById('street').value = address.street;
-                        document.getElementById('city').value = address.city;
-                        document.getElementById('state').value = address.state;
-                        document.getElementById('zipcodedata').value = address.zipcode;
-                    });
-                });
-
-            })
-        .catch(error => console.error('Erro:', error));
-    });
-</script>
-    
+@section('scripts')
+    @vite(['resources/js/custom/customCreate.js'])
+@endsection

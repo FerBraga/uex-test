@@ -23,9 +23,9 @@ Route::get('/home', function () {
 
 Route::middleware('auth', 'verified')->group(function () {
     Route::get('/home', [ContactController::class, 'list'])->name('home');
-    Route::post('/contact/store',[ContactController::class, 'store'])->name('contact.store');
-    Route::put('/contact/{id}/edit',[ContactController::class, 'update'])->name('contact.edit');
-    Route::delete('/contact/{id}/delete',[ContactController::class, 'destroy'])->name('contact.destroy');
+    Route::post('/contact',[ContactController::class, 'store'])->name('contact.store');
+    Route::put('/contact/{id}',[ContactController::class, 'update'])->name('contact.update');
+    Route::delete('/contact/{id}',[ContactController::class, 'destroy'])->name('contact.destroy');
     Route::get('/get-address', [ContactController::class, 'getAddress'])->name('get.address');
     Route::get('/get-cep', [ContactController::class, 'getCep'])->name('get.cep');
     Route::get('/get-map', [ContactController::class, 'getMap'])->name('get.map');

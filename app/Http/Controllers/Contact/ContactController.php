@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Contact;
 
 use App\Helpers\CpfValidator;
+use App\Helpers\GetAddress;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contact\CreateContactRequest;
 use App\Http\Requests\Contact\UpdateContactRequest;
@@ -46,22 +47,7 @@ class ContactController extends Controller
 
         $search = urlencode("{$data['city']}, {$data['state']}, {$data['street']}");
 
-        try {
-        
-            $response = Http::withHeaders([
-                'User-Agent' => 'MinhaAplicacao/1.0 (contato@minhaempresa.com)', 
-                'Referer' => 'https://minhaempresa.com',
-            ])->get(env('API_GEO_MAP_URL') . $search);
- 
-        } catch (RequestException $e) {
-            // Captura erros de requisição (como problemas de conexão)
-            Log::info('Erro: ' .$e->getMessage());
-
-        } catch (\Exception $e) {
-            // Captura outros tipos de erros
-            Log::info('Erro: ' .$e->getMessage());
-
-        }
+        $address = GetAddress::get($search);
 
         $data = [
             'city' => $data['city'],
@@ -72,8 +58,8 @@ class ContactController extends Controller
             'phone' => $data['phone'],
             'street' => $data['street'],
             'zipcode' => $data['zipcode'],
-            'longitude' => $response[0]['lon'],
-            'latitude' => $response[0]['lat'], 
+            'longitude' => $address[0]['lon'] ?  $address[0]['lon'] : '',
+            'latitude' => $address[0]['lat'] ?  $address[0]['lon'] : '', 
             'complementation' => $data['complementation'] ? $data['complementation'] : null,
         ];
 
@@ -178,26 +164,11 @@ class ContactController extends Controller
    
         $search = urlencode($request->input('search'));
 
-        try {
-        
-            $response = Http::withHeaders([
-                'User-Agent' => 'MinhaAplicacao/1.0 (contato@minhaempresa.com)', 
-                'Referer' => 'https://minhaempresa.com',
-            ])->get(env('API_GEO_MAP_URL') . $search);
-
-        } catch (RequestException $e) {
-            // Captura erros de requisição (como problemas de conexão)
-            Log::info('Erro: ' .$e->getMessage());
-
-        } catch (\Exception $e) {
-            // Captura outros tipos de erros
-            Log::info('Erro: ' .$e->getMessage());
-
-        }
+        $addresses = GetAddress::get($search);
 
         $dataFormatted = [];
 
-        foreach(array_slice($response->json(), 0, 3)  as $address) {
+        foreach(array_slice($addresses->json(), 0, 3)  as $address) {
             $data = [
                'street' => $address['address']['road'] ?? '',
                 'city' => $address['address']['city'] ?? '',
