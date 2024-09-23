@@ -48,7 +48,11 @@ endereços no mapa interativo.
 - Iniciando o servidor Laravel:
       Rode `php artisan serve` e pronto, só acessar via 'http://127.0.0.1:8000/'. E também rode `npm run build` para buildar o front-end.
 
+
 ## Testes e documentação:
 
  - Testes:
      Este projeto conta com cases de testes unitários de todos os endpoints, para rodá-los: `php artisan test`.
+
+
+Obs: No lugar da API Google Maps, que não pode ser usada neste momento, utiliazmos MapBox no lugar, que atende o propósito.
