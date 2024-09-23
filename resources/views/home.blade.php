@@ -74,7 +74,7 @@
                                         <div>
                                             <a href="#" data-all="{{ $contact }}" data-bs-toggle="modal" data-bs-target="#updateContactModal" class="btn btn-secondary btn-sm">Editar</a>
 
-                                            <form action="{{ route('contact.destroy', 5) }}" method="POST" style="display:inline;">
+                                            <form action="{{ route('contact.destroy', $contact->id) }}" method="POST" style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">Deletar</button>

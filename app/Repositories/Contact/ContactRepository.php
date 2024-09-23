@@ -134,6 +134,7 @@ class ContactRepository
 
         if ($userIsOwner) {
             $contact = Contact::findOrFail($id);
+
             $contact->address->delete();
             $contact->delete();
 
