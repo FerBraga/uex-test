@@ -56,3 +56,10 @@ endereços no mapa interativo.
 
 
 Obs: No lugar da API Google Maps, que não pode ser usada neste momento, utiliazmos MapBox no lugar, que atende o propósito.
+
+Exemplos:
+
+ <img src="./Captura de tela 2024-09-23 115355.png">
+---
+---
+ <img src="./Captura de tela 2024-09-23 115411.png">
